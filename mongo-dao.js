@@ -44,21 +44,77 @@ module.exports.findAllCharacters = function (callback) {
     dataPromise.then((characters) => callback(characters));
 };
 
-// retrieve a single book
-module.exports.findBook = function (isbn, callback) {
-    let dataPromise = collection.findOne({"isbn":isbn});
-    dataPromise.then((book) => callback(book));
+
+module.exports.findCharacter = function (id, callback) {
+    let dataPromise = charColl.findOne({"id":parseInt(id)});
+    dataPromise.then((character) => callback(character));
 };
 
-// delete a single book
-module.exports.deleteBook = function (isbn, callback) {
-    let dataPromise = collection.deleteOne({"isbn": isbn});
-    dataPromise.then((ok) => callback(ok));
+
+module.exports.findFilm = function (id, callback) {
+    let dataPromise = filmsColl.findOne({"id":+id});
+    dataPromise.then((film) => callback(film));
 };
 
-// update a single book
-module.exports.updateBook = function (isbn, book, callback) {
-	delete book._id;
-    let dataPromise = collection.updateOne( {isbn: isbn}, {$set: book}, {upsert: true}, callback);
-    dataPromise.then((ok) => callback(ok));
+
+module.exports.findPlanet = function (id, callback) {
+    let dataPromise = planetsColl.findOne( {"id": parseInt(id)});
+    dataPromise.then((planet) => callback(planet));
 };
+
+module.exports.findCharsByFilm = async function (id, callback) {
+    let fcArr = await fcColl.find({"film_id":parseInt(id)}).toArray();
+    let data = [];
+    for (let i = 0; i < fcArr.length; i++) {
+        let fc = fcArr[i];
+        let record = await charColl.findOne({"id":parseInt(fc.character_id)});
+        
+        data.push(record);  
+    }
+    
+    callback(data);
+};
+
+module.exports.findPlanetsByFilm = async function (id, callback) {
+    let fpArr = await fpColl.find({"film_id":parseInt(id)}).toArray();
+    let data = [];
+    for (let i = 0; i < fpArr.length; i++) {
+        let fp = fpArr[i];
+        let record = await planetsColl.findOne({"id":parseInt(fp.planet_id)});
+        
+        data.push(record);  
+    }
+    
+    callback(data);
+};
+
+module.exports.findFilmsByCharacter = async function (id, callback) {
+    let fcArr = await fcColl.find({"character_id":parseInt(id)}).toArray();
+    let data = [];
+    for (let i = 0; i < fcArr.length; i++) {
+        let fc = fcArr[i];
+        let record = await filmsColl.findOne({"id":parseInt(fc.film_id)});
+        
+        data.push(record);  
+    }
+    
+    callback(data);
+};
+
+module.exports.findFilmsByPlanet = async function (id, callback) {
+    let fpArr = await fpColl.find({"planet_id":parseInt(id)}).toArray();
+    let data = [];
+    for (let i = 0; i < fpArr.length; i++) {
+        let fp = fpArr[i];
+        let record = await filmsColl.findOne({"id":parseInt(fp.film_id)});
+        
+        data.push(record);  
+    }
+    
+    callback(data);
+};
+
+module.exports.findCharactersByPlanet = function (id, callback) {
+    let dataPromise = charColl.find({"homeworld":parseInt(id)}).toArray();
+    dataPromise.then((character) => callback(character)); 
+}
